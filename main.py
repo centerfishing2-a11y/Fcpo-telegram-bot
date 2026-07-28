@@ -2,7 +2,7 @@ import os
 import requests
 import feedparser
 from urllib.parse import quote
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
@@ -116,7 +116,7 @@ if news:
 
     msg = (
         "🌴 LAPORAN FUNDAMENTAL FCPO\n"
-        f"📅 {datetime.now().strftime('%d-%m-%Y %H:%M')}\n\n"
+        f"📅 {(datetime.now(timezone.utc) + timedelta(hours=8)).strftime('%d-%m-%Y %H:%M')}\n\n"
         "━━━━━━━━━━━━━━\n\n"
         "📰 BERITA UTAMA\n\n"
     )
