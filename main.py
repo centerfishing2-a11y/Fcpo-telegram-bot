@@ -34,11 +34,8 @@ def get_fcpo_news():
     for feed in feeds:
         data = feedparser.parse(feed)
 
-        for item in data.entries[:10]:
-            title = item.title.lower()
-
-            if any(k in title for k in keywords):
-                result.append(item.title)
+        for item in data.entries[:5]:
+            result.append(item.title)
 
     return result[:5]
 
