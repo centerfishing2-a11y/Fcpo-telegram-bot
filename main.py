@@ -20,7 +20,7 @@ def send_telegram(message):
 def get_fcpo_news():
 
     query = quote(
-        "FCPO palm oil Malaysia export inventory production biodiesel"
+        "FCPO OR crude palm oil OR Malaysian palm oil OR MPOB OR palm oil export"
     )
 
     url = f"https://news.google.com/rss/search?q={query}"
@@ -30,81 +30,87 @@ def get_fcpo_news():
     news = []
 
     blacklist = [
-        "calendar",
         "indicator",
-        "explained",
+        "calendar",
         "history",
+        "explained",
         "course",
         "signal"
     ]
-
-    keywords = [
-        "fcpo",
-        "palm oil",
-        "crude palm oil",
-        "malaysia",
-        "mpob",
-        "export",
-        "inventory",
-        "production",
-        "biodiesel",
-        "china",
-        "india"
-    ]
-
 
     for item in feed.entries[:20]:
 
         title = item.title
         lower = title.lower()
 
-        if any(x in lower for x in blacklist):
+        if any(word in lower for word in blacklist):
             continue
 
-        if any(x in lower for x in keywords):
-            news.append(title)
-
+        news.append(title)
 
     return news[:5]
 
 
-def sentiment(news):
+def analyze_sentiment(news):
 
     text = " ".join(news).lower()
 
-    bullish_words = [
+    bullish = [
         "rise",
         "higher",
         "gain",
         "strong",
-        "increase",
+        "demand",
         "support",
-        "demand"
+        "biodiesel",
+        "export increase",
+        "stock fall",
+        "inventory fall"
     ]
 
-    bearish_words = [
+    bearish = [
         "fall",
         "lower",
         "decline",
         "weak",
-        "drop",
         "pressure",
-        "slow"
+        "inventory rise",
+        "stocks increase",
+        "slow demand"
     ]
 
+    bull_score = 0
+    bear_score = 0
 
-    bull = sum(word in text for word in bullish_words)
-    bear = sum(word in text for word in bearish_words)
+    bull_reason = []
+    bear_reason = []
 
 
-    if bull > bear:
-        return "🟢 BULLISH"
+    for word in bullish:
+        if word in text:
+            bull_score += 10
+            bull_reason.append(word)
 
-    elif bear > bull:
-        return "🔴 BEARISH"
+
+    for word in bearish:
+        if word in text:
+            bear_score += 10
+            bear_reason.append(word)
+
+
+    score = 50 + bull_score - bear_score
+
+    if score > 60:
+        sentiment = "🟢 BULLISH"
+
+    elif score < 40:
+        sentiment = "🔴 BEARISH"
 
     else:
-        return "🟡 NEUTRAL"
+        sentiment = "🟡 NEUTRAL"
+
+
+    return sentiment, score, bull_reason, bear_reason
 
 
 
@@ -113,25 +119,44 @@ news = get_fcpo_news()
 
 if news:
 
-    mood = sentiment(news)
+    sentiment, score, bull, bear = analyze_sentiment(news)
 
-    message = (
-        "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
-    )
+    message = "🌴 FCPO FUNDAMENTAL UPDATE\n\n"
+
+    message += "📰 Berita Utama:\n\n"
 
     for item in news:
-        message += "📰 " + item + "\n\n"
+        message += "• " + item + "\n\n"
+
 
     message += (
-        "📊 SENTIMEN FCPO:\n"
-        + mood
-        + "\n\n⏰ Update automatik setiap jam"
+        "📊 Analisis Sentimen:\n"
+        f"{sentiment}\n"
+        f"Skor: {score}/100\n\n"
     )
+
+
+    if bull:
+        message += "🟢 Faktor Positif:\n"
+        for x in bull:
+            message += "• " + x + "\n"
+
+        message += "\n"
+
+
+    if bear:
+        message += "🔴 Faktor Risiko:\n"
+        for x in bear:
+            message += "• " + x + "\n"
+
+
+    message += "\n⏰ Update automatik setiap jam"
+
 
 else:
 
     message = (
-        "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
+        "🌴 FCPO FUNDAMENTAL UPDATE\n\n"
         "Tiada berita utama ditemui."
     )
 
