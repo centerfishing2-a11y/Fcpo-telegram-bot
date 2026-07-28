@@ -5,29 +5,31 @@ import feedparser
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = os.environ["CHAT_ID"]
 
-def send_telegram(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    requests.post(url, data={
-        "chat_id": CHAT_ID,
-        "text": message
-    })
-
 def get_news():
-    url = "https://news.google.com/rss/search?q=palm+oil"
+    url = "https://news.google.com/rss/search?q=(FCPO OR crude palm oil OR Malaysian palm oil OR palm oil futures)"
     feed = feedparser.parse(url)
 
     news = []
 
-    for item in feed.entries[:5]:
-        news.append("📰 " + item.title)
+    for item in feed.entries[:10]:
+        title = item.title.lower()
 
-    return news
+        if any(word in title for word in [
+            "fcpo",
+            "crude palm oil",
+            "palm oil futures",
+            "malaysian palm oil",
+            "mpob"
+        ]):
+            news.append("📰 " + item.title)
+
+    return news[:5]
 
 news = get_news()
 
 if news:
-    message = "🌴 FCPO NEWS TEST\n\n"
-    message += "\n".join(news)
+   message = "🌴 FCPO FUNDAMENTAL UPDATE\n\n"
+   message += "\n".join(news) 
 else:
     message = "❌ RSS tidak memberi berita."
 
