@@ -1,6 +1,8 @@
 import os
 import requests
 import feedparser
+from urllib.parse import quote
+
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = os.environ["CHAT_ID"]
@@ -9,54 +11,105 @@ CHAT_ID = os.environ["CHAT_ID"]
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-    data = {
+    requests.post(url, data={
         "chat_id": CHAT_ID,
         "text": message
-    }
-
-    requests.post(url, data=data)
+    })
 
 
 def get_fcpo_news():
-    feeds = [
-        "https://news.google.com/rss/search?q=FCPO",
-        "https://news.google.com/rss/search?q=crude+palm+oil",
-        "https://news.google.com/rss/search?q=Malaysian+palm+oil"
-    ]
 
-    keywords = [
-        "fcpo",
-        "crude palm oil",
-        "palm oil futures",
-        "malaysian palm oil",
-        "mpob"
-    ]
+    query = quote(
+        "FCPO OR crude palm oil OR Malaysian palm oil futures OR MPOB"
+    )
+
+    url = f"https://news.google.com/rss/search?q={query}"
+
+    feed = feedparser.parse(url)
 
     news = []
 
-    for url in feeds:
-        feed = feedparser.parse(url)
+    remove_words = [
+        "indicator",
+        "explained",
+        "how to",
+        "education",
+        "course"
+    ]
 
-        for item in feed.entries[:10]:
-            title = item.title
+    keep_words = [
+        "fcpo",
+        "palm oil",
+        "crude palm oil",
+        "malaysia",
+        "mpob",
+        "futures",
+        "export",
+        "inventory"
+    ]
 
-            if any(word in title.lower() for word in keywords):
-                news.append("📰 " + title)
+
+    for item in feed.entries[:15]:
+
+        title = item.title
+        lower = title.lower()
+
+        if any(x in lower for x in remove_words):
+            continue
+
+        if any(x in lower for x in keep_words):
+            news.append(title)
+
 
     return news[:5]
+
+
+def translate_title(title):
+
+    # Terjemahan asas untuk perkataan yang biasa keluar FCPO
+
+    replacements = {
+        "prices": "harga",
+        "price": "harga",
+        "could retest": "berpotensi menguji semula",
+        "bearish momentum": "momentum penurunan",
+        "bullish momentum": "momentum kenaikan",
+        "rises": "meningkat",
+        "falls": "menurun",
+        "declines": "merosot",
+        "higher": "lebih tinggi",
+        "lower": "lebih rendah",
+        "palm oil": "minyak sawit",
+        "crude palm oil": "minyak sawit mentah",
+        "exports": "eksport",
+        "inventory": "inventori"
+    }
+
+    result = title
+
+    for eng, bm in replacements.items():
+        result = result.replace(eng, bm)
+
+    return result
 
 
 news = get_fcpo_news()
 
 
 if news:
-    message = "🌴 FCPO FUNDAMENTAL UPDATE\n\n"
-    
+
+    message = "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
+
     for item in news:
-        message += item + "\n\n"
+        bm = translate_title(item)
+        message += "📰 " + bm + "\n\n"
 
 else:
-    message = "🌴 FCPO FUNDAMENTAL UPDATE\n\nTiada berita FCPO terbaru ditemui."
+
+    message = (
+        "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
+        "Tiada berita FCPO terbaru ditemui."
+    )
 
 
 send_telegram(message)
