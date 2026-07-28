@@ -20,7 +20,7 @@ def send_telegram(message):
 def get_fcpo_news():
 
     query = quote(
-        "FCPO OR crude palm oil OR Malaysian palm oil futures OR MPOB"
+        "FCPO palm oil Malaysia export inventory production biodiesel"
     )
 
     url = f"https://news.google.com/rss/search?q={query}"
@@ -29,68 +29,83 @@ def get_fcpo_news():
 
     news = []
 
-    remove_words = [
+    blacklist = [
+        "calendar",
         "indicator",
         "explained",
-        "how to",
-        "education",
-        "course"
+        "history",
+        "course",
+        "signal"
     ]
 
-    keep_words = [
+    keywords = [
         "fcpo",
         "palm oil",
         "crude palm oil",
         "malaysia",
         "mpob",
-        "futures",
         "export",
-        "inventory"
+        "inventory",
+        "production",
+        "biodiesel",
+        "china",
+        "india"
     ]
 
 
-    for item in feed.entries[:15]:
+    for item in feed.entries[:20]:
 
         title = item.title
         lower = title.lower()
 
-        if any(x in lower for x in remove_words):
+        if any(x in lower for x in blacklist):
             continue
 
-        if any(x in lower for x in keep_words):
+        if any(x in lower for x in keywords):
             news.append(title)
 
 
     return news[:5]
 
 
-def translate_title(title):
+def sentiment(news):
 
-    # Terjemahan asas untuk perkataan yang biasa keluar FCPO
+    text = " ".join(news).lower()
 
-    replacements = {
-        "prices": "harga",
-        "price": "harga",
-        "could retest": "berpotensi menguji semula",
-        "bearish momentum": "momentum penurunan",
-        "bullish momentum": "momentum kenaikan",
-        "rises": "meningkat",
-        "falls": "menurun",
-        "declines": "merosot",
-        "higher": "lebih tinggi",
-        "lower": "lebih rendah",
-        "palm oil": "minyak sawit",
-        "crude palm oil": "minyak sawit mentah",
-        "exports": "eksport",
-        "inventory": "inventori"
-    }
+    bullish_words = [
+        "rise",
+        "higher",
+        "gain",
+        "strong",
+        "increase",
+        "support",
+        "demand"
+    ]
 
-    result = title
+    bearish_words = [
+        "fall",
+        "lower",
+        "decline",
+        "weak",
+        "drop",
+        "pressure",
+        "slow"
+    ]
 
-    for eng, bm in replacements.items():
-        result = result.replace(eng, bm)
 
-    return result
+    bull = sum(word in text for word in bullish_words)
+    bear = sum(word in text for word in bearish_words)
+
+
+    if bull > bear:
+        return "🟢 BULLISH"
+
+    elif bear > bull:
+        return "🔴 BEARISH"
+
+    else:
+        return "🟡 NEUTRAL"
+
 
 
 news = get_fcpo_news()
@@ -98,17 +113,26 @@ news = get_fcpo_news()
 
 if news:
 
-    message = "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
+    mood = sentiment(news)
+
+    message = (
+        "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
+    )
 
     for item in news:
-        bm = translate_title(item)
-        message += "📰 " + bm + "\n\n"
+        message += "📰 " + item + "\n\n"
+
+    message += (
+        "📊 SENTIMEN FCPO:\n"
+        + mood
+        + "\n\n⏰ Update automatik setiap jam"
+    )
 
 else:
 
     message = (
         "🌴 KEMASKINI FUNDAMENTAL FCPO\n\n"
-        "Tiada berita FCPO terbaru ditemui."
+        "Tiada berita utama ditemui."
     )
 
 
