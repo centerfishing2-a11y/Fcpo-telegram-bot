@@ -56,31 +56,38 @@ def analysis(news):
     bull = []
     bear = []
 
+    score = 50
+
+
+    # Faktor bullish FCPO
+    if "stocks expected to fall" in text or "inventory fall" in text:
+        score += 15
+        bull.append("Inventori sawit dijangka menurun, memberi sokongan kepada harga")
+
+    if "supply outlook tightens" in text or "tightening supply" in text:
+        score += 15
+        bull.append("Bekalan semakin ketat dan boleh menyokong kenaikan FCPO")
+
     if "biodiesel" in text:
-        bull.append("Permintaan biodiesel memberi sokongan kepada minyak sawit")
+        score += 10
+        bull.append("Permintaan biodiesel meningkatkan penggunaan sawit")
 
-    if "export" in text:
-        bull.append("Eksport sawit menjadi faktor sokongan")
-
-    if "tightening supply" in text:
-        bull.append("Bekalan semakin ketat")
-
-    if "rise" in text or "higher" in text:
-        bull.append("Momentum kenaikan harga dikesan")
+    if "price expected" in text:
+        score += 5
+        bull.append("Unjuran harga masih menunjukkan sokongan")
 
 
-    if "decline" in text or "fall" in text:
-        bear.append("Tekanan penurunan harga berlaku")
+    # Faktor bearish FCPO
+    if "exports fall" in text or "export decline" in text:
+        score -= 10
+        bear.append("Eksport menurun memberi tekanan kepada permintaan")
 
-    if "weaker crude" in text:
-        bear.append("Kelemahan minyak mentah memberi tekanan")
-
-    if "inventory" in text:
-        bear.append("Perubahan inventori perlu diberi perhatian")
+    if "crude oil weaken" in text or "weaker crude" in text:
+        score -= 10
+        bear.append("Kelemahan minyak mentah boleh menekan sentimen")
 
 
-    score = 50 + (len(bull)*8) - (len(bear)*8)
-    score = max(0, min(score,100))
+    score = max(0, min(score, 100))
 
 
     if score >= 65:
