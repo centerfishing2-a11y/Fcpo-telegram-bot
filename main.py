@@ -12,13 +12,10 @@ CHAT_ID = os.environ["CHAT_ID"]
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-    requests.post(
-        url,
-        data={
-            "chat_id": CHAT_ID,
-            "text": message
-        }
-    )
+    requests.post(url, data={
+        "chat_id": CHAT_ID,
+        "text": message
+    })
 
 
 def get_fcpo_news():
@@ -40,22 +37,7 @@ def get_fcpo_news():
         "history",
         "course",
         "explained",
-        "stock price"
-    ]
-
-    keywords = [
-        "fcpo",
-        "palm oil",
-        "crude palm oil",
-        "malaysia",
-        "mpob",
-        "export",
-        "inventory",
-        "production",
-        "biodiesel",
-        "demand",
-        "china",
-        "india"
+        "technical analysis"
     ]
 
 
@@ -64,74 +46,110 @@ def get_fcpo_news():
         title = item.title
         lower = title.lower()
 
-        if any(x in lower for x in blacklist):
+        if any(word in lower for word in blacklist):
             continue
 
-        if any(x in lower for x in keywords):
-            news.append(title)
+        news.append(title)
 
 
     return news[:5]
 
 
-def analyse_market(news):
+def translate_basic(text):
+
+    translation = {
+        "Palm Oil": "Minyak Sawit",
+        "palm oil": "minyak sawit",
+        "Crude Palm Oil": "Minyak Sawit Mentah",
+        "crude palm oil": "minyak sawit mentah",
+        "prices rise": "harga meningkat",
+        "prices fall": "harga menurun",
+        "rise": "meningkat",
+        "rises": "meningkat",
+        "gain": "kenaikan",
+        "gains": "kenaikan",
+        "decline": "penurunan",
+        "declines": "menurun",
+        "fall": "jatuh",
+        "falls": "menurun",
+        "weaker": "melemah",
+        "stronger": "mengukuh",
+        "demand": "permintaan",
+        "supply": "bekalan",
+        "inventory": "inventori",
+        "export": "eksport",
+        "exports": "eksport",
+        "biodiesel": "biodiesel",
+        "Indonesia": "Indonesia",
+        "Malaysia": "Malaysia"
+    }
+
+    result = text
+
+    for eng, bm in translation.items():
+        result = result.replace(eng, bm)
+
+    return result
+
+
+def analyse(news):
 
     text = " ".join(news).lower()
-
-
-    bullish_terms = {
-        "demand": "Permintaan minyak sawit kukuh",
-        "biodiesel": "Sokongan daripada permintaan biodiesel",
-        "export": "Eksport sawit memberi sokongan",
-        "rise": "Harga menunjukkan kenaikan",
-        "gain": "Momentum kenaikan meningkat",
-        "support": "Faktor sokongan harga",
-        "inventory fall": "Inventori berkurangan"
-    }
-
-
-    bearish_terms = {
-        "fall": "Tekanan penurunan harga",
-        "decline": "Momentum lemah",
-        "weak": "Sentimen pasaran melemah",
-        "pressure": "Tekanan jualan meningkat",
-        "inventory rise": "Inventori meningkat",
-        "crude oil": "Pergerakan minyak mentah memberi tekanan",
-        "lower": "Harga lebih rendah"
-    }
 
 
     bullish = []
     bearish = []
 
 
-    for key, value in bullish_terms.items():
-        if key in text:
-            bullish.append(value)
+    bullish_words = {
+        "biodiesel": "Permintaan biodiesel menyokong harga FCPO",
+        "strong demand": "Permintaan minyak sawit kekal kukuh",
+        "tightening supply": "Bekalan semakin ketat",
+        "export": "Eksport sawit memberi sokongan",
+        "rise": "Momentum kenaikan harga"
+    }
 
 
-    for key, value in bearish_terms.items():
-        if key in text:
-            bearish.append(value)
+    bearish_words = {
+        "weaker crude": "Kelemahan minyak mentah memberi tekanan",
+        "decline": "Tekanan penurunan harga",
+        "fall": "Harga mengalami tekanan",
+        "inventory rise": "Inventori meningkat",
+        "weak demand": "Permintaan melemah"
+    }
 
 
-    score = 50 + (len(bullish) * 8) - (len(bearish) * 8)
+    score = 50
 
 
-    if score > 65:
-        sentiment = "🟢 BULLISH"
-        bias = "Buy on weakness"
+    for word, reason in bullish_words.items():
 
-    elif score < 40:
-        sentiment = "🔴 BEARISH"
-        bias = "Sell on rally"
+        if word in text:
+            score += 10
+            bullish.append(reason)
 
-    else:
-        sentiment = "🟡 NEUTRAL"
-        bias = "Tunggu pengesahan"
+
+    for word, reason in bearish_words.items():
+
+        if word in text:
+            score -= 10
+            bearish.append(reason)
 
 
     score = max(0, min(score, 100))
+
+
+    if score >= 65:
+        sentiment = "🟢 BULLISH"
+        bias = "Cari peluang BUY ketika retracement"
+
+    elif score <= 35:
+        sentiment = "🔴 BEARISH"
+        bias = "Berhati-hati dengan tekanan SELL"
+
+    else:
+        sentiment = "🟡 NEUTRAL"
+        bias = "Tunggu pengesahan arah"
 
 
     return sentiment, score, bias, bullish, bearish
@@ -143,11 +161,11 @@ news = get_fcpo_news()
 
 if news:
 
-    sentiment, score, bias, bullish, bearish = analyse_market(news)
+    sentiment, score, bias, bullish, bearish = analyse(news)
 
 
     message = (
-        "🌴 FCPO FUNDAMENTAL REPORT\n"
+        "🌴 LAPORAN FUNDAMENTAL FCPO\n"
         f"📅 {datetime.now().strftime('%d-%m-%Y %H:%M')}\n\n"
         "━━━━━━━━━━━━━━\n\n"
         "📰 BERITA UTAMA\n\n"
@@ -155,7 +173,7 @@ if news:
 
 
     for item in news:
-        message += "• " + item + "\n\n"
+        message += "• " + translate_basic(item) + "\n\n"
 
 
     message += (
@@ -192,24 +210,24 @@ if news:
     )
 
 
-    if score > 65:
-        message += "Momentum fundamental menyokong kenaikan FCPO."
+    if score >= 65:
+        message += "Fundamental FCPO menunjukkan sokongan kenaikan."
 
-    elif score < 40:
-        message += "Tekanan fundamental masih menguasai FCPO."
+    elif score <= 35:
+        message += "Fundamental FCPO menunjukkan tekanan penurunan."
 
     else:
-        message += "Pasaran bercampur. Tunggu pengesahan arah."
+        message += "Pasaran FCPO masih bercampur dan memerlukan pengesahan."
 
 
-    message += "\n\n⏰ Update automatik setiap jam"
+    message += "\n\n⏰ Kemas kini automatik setiap jam"
 
 
 else:
 
     message = (
-        "🌴 FCPO FUNDAMENTAL REPORT\n\n"
-        "Tiada berita utama FCPO ditemui."
+        "🌴 LAPORAN FUNDAMENTAL FCPO\n\n"
+        "Tiada berita utama ditemui."
     )
 
 
