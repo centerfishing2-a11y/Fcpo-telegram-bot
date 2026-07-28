@@ -5,22 +5,6 @@ import feedparser
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = os.environ["CHAT_ID"]
 
-feeds = [
-    "https://news.google.com/rss/search?q=palm+oil+Malaysia",
-    "https://news.google.com/rss/search?q=crude+palm+oil",
-    "https://news.google.com/rss/search?q=FCPO",
-    "https://news.google.com/rss/search?q=Malaysian+palm+oil+futures"
-]
-
-keywords = [
-    "palm",
-    "oil",
-    "fcpo",
-    "cpo",
-    "malaysia",
-    "mpob"
-]
-
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     requests.post(url, data={
@@ -28,26 +12,23 @@ def send_telegram(message):
         "text": message
     })
 
-def get_fcpo_news():
-    result = []
+def get_news():
+    url = "https://news.google.com/rss/search?q=palm+oil"
+    feed = feedparser.parse(url)
 
-    for feed in feeds:
-        data = feedparser.parse(feed)
+    news = []
 
-        for item in data.entries[:5]:
-            result.append(item.title)
+    for item in feed.entries[:5]:
+        news.append("📰 " + item.title)
 
-    return result[:5]
+    return news
 
-news = get_fcpo_news()
+news = get_news()
 
 if news:
-    msg = "🌴 FCPO FUNDAMENTAL UPDATE\n\n"
-
-    for item in news:
-        msg += "📰 " + item + "\n\n"
-
+    message = "🌴 FCPO NEWS TEST\n\n"
+    message += "\n".join(news)
 else:
-    msg = "🌴 FCPO FUNDAMENTAL UPDATE\n\nTiada berita FCPO terbaru ditemui."
+    message = "❌ RSS tidak memberi berita."
 
-send_telegram(msg)
+send_telegram(message)
