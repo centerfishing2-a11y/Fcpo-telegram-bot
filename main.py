@@ -6,15 +6,18 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = os.environ["CHAT_ID"]
 
 feeds = [
-    "https://news.google.com/rss/search?q=Malaysia+palm+oil",
-    "https://news.google.com/rss/search?q=FCPO+palm+oil"
+    "https://news.google.com/rss/search?q=palm+oil+Malaysia",
+    "https://news.google.com/rss/search?q=crude+palm+oil",
+    "https://news.google.com/rss/search?q=FCPO",
+    "https://news.google.com/rss/search?q=Malaysian+palm+oil+futures"
 ]
 
 keywords = [
-    "palm oil",
+    "palm",
+    "oil",
     "fcpo",
-    "crude palm oil",
-    "malaysia palm",
+    "cpo",
+    "malaysia",
     "mpob"
 ]
 
