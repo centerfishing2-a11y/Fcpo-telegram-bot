@@ -2,7 +2,7 @@ name: FCPO Telegram Bot
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "0 * * * *"  # Ini akan mengarahkan GitHub Actions berjalan setiap jam
   workflow_dispatch:
 
 jobs:
