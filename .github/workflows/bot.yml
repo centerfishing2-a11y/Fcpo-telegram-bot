@@ -2,7 +2,7 @@ name: FCPO Telegram Bot
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Ini akan mengarahkan GitHub Actions berjalan setiap jam
+    - cron: "0 * * * *"  # Berjalan tepat setiap jam
   workflow_dispatch:
 
 jobs:
@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2  # Menggunakan versi terkini
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.3.0  # Menggunakan versi terkini
         with:
           python-version: "3.x"
 
@@ -28,3 +28,4 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
           python main.py
+
