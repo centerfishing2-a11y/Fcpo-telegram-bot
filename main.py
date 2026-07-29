@@ -43,13 +43,12 @@ def get_news():
         "course", "explained"
     ]
 
-    waktu_sekarang_utc = datetime.now(timezone.utc)
-    had_masa = waktu_sekarang_utc - timedelta(minutes=75)
-
     if not hasattr(feed, 'entries') or not feed.entries:
         print("Tiada sebarang artikel ditemui dalam RSS Google News.")
         return []
 
+    # --- KOD UJIAN (PILIHAN 1): MATIKAN TAPISAN MASA ---
+    # Kita ambil terus 5 berita teratas yang ada di Google News tanpa mengira masa ia diterbitkan
     for item in feed.entries[:20]:
         title = getattr(item, 'title', '')
         if not title:
@@ -59,15 +58,13 @@ def get_news():
         if any(x in low for x in blacklist):
             continue
 
-        if hasattr(item, 'published_parsed') and item.published_parsed:
-            waktu_artikel = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
-        else:
-            continue
+        # Masukkan terus tanpa tapisan masa had_masa
+        result.append(title)
+        if len(result) == 5:
+            break
 
-        if had_masa < waktu_artikel <= waktu_sekarang_utc:
-            result.append(title)
+    return result
 
-    return result[:5]
 
 def analysis(news):
     if not news:
