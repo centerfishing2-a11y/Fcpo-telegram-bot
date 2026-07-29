@@ -18,35 +18,39 @@ def send_telegram(msg):
 
 
 def get_news():
-
     q = quote("FCPO palm oil Malaysia biodiesel MPOB export inventory")
-
-    url = f"https://news.google.com/rss/search?q={q}"
-
+    url = f"https://google.com{q}"
     feed = feedparser.parse(url)
 
     result = []
-
     blacklist = [
-        "indicator",
-        "signal",
-        "calendar",
-        "history",
-        "course",
-        "explained"
+        "indicator", "signal", "calendar", "history", 
+        "course", "explained"
     ]
 
-    for item in feed.entries[:20]:
+    # PENYELARASAN MASA UTC UNTUK JADUAL SETIAP JAM
+    waktu_sekarang_utc = datetime.now(timezone.utc)
+    # Ditukar kepada 75 minit untuk menampung sela masa 1 jam + delay pelayan GitHub
+    had_masa = waktu_sekarang_utc - timedelta(minutes=75)
 
+    for item in feed.entries[:20]:
         title = item.title
         low = title.lower()
 
         if any(x in low for x in blacklist):
             continue
 
-        result.append(title)
+        if hasattr(item, 'published_parsed') and item.published_parsed:
+            waktu_artikel = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
+        else:
+            continue
+
+        # Ambil berita yang diterbitkan dalam tempoh 1 jam lepas
+        if had_masa < waktu_artikel <= waktu_sekarang_utc:
+            result.append(title)
 
     return result[:5]
+
 
 
 def analysis(news):
