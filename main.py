@@ -174,11 +174,3 @@ if news:
 
 
     msg += "\n\n⏰ Kemas kini automatik setiap jam"
-
-
-else:
-
-    msg = "🌴 Tiada berita FCPO ditemui."
-
-
-send_telegram(msg)
