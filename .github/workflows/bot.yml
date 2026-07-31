@@ -1,31 +1,34 @@
-name: FCPO Telegram Bot
+name: FCPO Bot PRO
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Berjalan tepat setiap jam
+    - cron: "0 * * * *"   # Setiap jam
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.2  # Menggunakan versi terkini
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5.3.0  # Menggunakan versi terkini
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.12"
 
-      - name: Install libraries
+      - name: Install Dependencies
         run: |
-          pip install requests feedparser
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run bot
+      - name: Run FCPO Bot
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
           python main.py
-
