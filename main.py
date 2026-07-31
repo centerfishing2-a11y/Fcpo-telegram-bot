@@ -10,7 +10,7 @@ def malaysia_time():
 
 
 def build_report(news, result):
-    report = f"""🌴 <b>LAPORAN FUNDAMENTAL FCPO</b>
+    report = f"""🌴 <b>FCPO PRO REPORT V3</b>
 
 📅 {malaysia_time()} MYT
 
@@ -20,27 +20,24 @@ def build_report(news, result):
 
 """
 
-    if news:
-        for item in news:
-            report += f"• {item}\n\n"
-    else:
-        report += "Tiada berita utama ditemui.\n\n"
+    for i, item in enumerate(news, start=1):
+        report += f"{i}. {item}\n\n"
 
-    report += f"""━━━━━━━━━━━━━━━━━━
+    report += "━━━━━━━━━━━━━━━━━━\n\n"
 
-📊 <b>SENTIMEN PASARAN</b>
+    report += "<b>📊 SENTIMEN PASARAN</b>\n\n"
 
-{result['sentiment']}
+    report += f"""{result['sentiment']}
 Skor : {result['score']}/100
 
 Bias :
 {result['bias']}
 
-━━━━━━━━━━━━━━━━━━
-
-🟢 <b>FAKTOR SOKONGAN</b>
-
 """
+
+    report += "━━━━━━━━━━━━━━━━━━\n\n"
+
+    report += "🟢 <b>FAKTOR SOKONGAN</b>\n\n"
 
     if result["support"]:
         for s in result["support"]:
@@ -48,7 +45,9 @@ Bias :
     else:
         report += "• Tiada faktor sokongan utama.\n"
 
-    report += "\n🔴 <b>FAKTOR TEKANAN</b>\n\n"
+    report += "\n"
+
+    report += "🔴 <b>FAKTOR TEKANAN</b>\n\n"
 
     if result["pressure"]:
         for p in result["pressure"]:
@@ -58,18 +57,43 @@ Bias :
 
     report += "\n━━━━━━━━━━━━━━━━━━\n\n"
 
+    report += "📝 <b>RUMUSAN FUNDAMENTAL</b>\n\n"
+
+    if result["score"] >= 70:
+        report += (
+            "Sentimen fundamental lebih memihak kepada kenaikan harga FCPO. "
+            "Permintaan dan faktor sokongan pasaran masih mengatasi tekanan semasa.\n\n"
+        )
+
+    elif result["score"] <= 35:
+        report += (
+            "Sentimen fundamental lebih cenderung negatif. "
+            "Trader perlu berhati-hati kerana tekanan pasaran masih tinggi.\n\n"
+        )
+
+    else:
+        report += (
+            "Sentimen pasaran masih bercampur. "
+            "Terdapat faktor positif yang menyokong harga, namun risiko luaran masih wujud. "
+            "Pergerakan harga dijangka bergantung kepada perkembangan berita seterusnya.\n\n"
+        )
+
+    report += "━━━━━━━━━━━━━━━━━━\n\n"
+
     report += "🎯 <b>KESIMPULAN TRADER</b>\n\n"
 
     if result["score"] >= 70:
-        report += "Fundamental lebih memihak kepada BUY."
+        report += "🟢 Bias: BUY ketika retracement."
 
     elif result["score"] <= 35:
-        report += "Fundamental lebih memihak kepada SELL."
+        report += "🔴 Bias: SELL ketika rebound."
 
     else:
-        report += "Fundamental masih bercampur. Tunggu pengesahan arah."
+        report += "🟡 Bias: Tunggu pengesahan arah sebelum membuat entry."
 
-    report += "\n\n🤖 FCPO BOT PRO V2"
+    report += "\n\n━━━━━━━━━━━━━━━━━━"
+
+    report += "\n🤖 FCPO BOT PRO V3"
 
     return report
 
