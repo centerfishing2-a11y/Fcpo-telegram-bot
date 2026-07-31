@@ -6,66 +6,83 @@ def analyze_news(news_list):
     pressure = []
 
     bullish = {
-        "biodiesel": 10,
-        "strong demand": 8,
-        "higher": 5,
-        "rise": 5,
+        "rebound": 8,
+        "rise": 6,
+        "rises": 6,
+        "higher": 6,
         "gain": 5,
-        "up": 3,
-        "tight supply": 10,
+        "gains": 5,
+        "firmer": 8,
+        "strong": 6,
+        "stronger": 6,
+        "optimism": 6,
+        "export": 5,
+        "biodiesel": 10,
+        "tight": 8,
+        "tightening": 8,
+        "supply": 4,
+        "demand": 8,
+        "mpob": 4,
         "inventory fall": 12,
-        "stocks fall": 10,
-        "export increase": 8,
-        "mpob": 5
+        "stocks fall": 12
     }
 
     bearish = {
         "decline": 8,
+        "declines": 8,
+        "slip": 6,
+        "slipped": 6,
         "fall": 5,
+        "falls": 5,
         "drop": 5,
         "lower": 5,
         "weak": 6,
-        "weaker": 6,
+        "weaken": 6,
+        "weakened": 6,
+        "pressure": 5,
+        "tariff": 5,
         "inventory rise": 10,
         "stocks rise": 10,
-        "export fall": 8,
-        "crude oil weaker": 8
+        "oversupply": 10
     }
 
-    for word, value in bullish.items():
-        if word in text:
-            score += value
+    for k, v in bullish.items():
+        if k in text:
+            score += v
 
-    for word, value in bearish.items():
-        if word in text:
-            score -= value
+    for k, v in bearish.items():
+        if k in text:
+            score -= v
+
+    if "export" in text:
+        support.append("Prospek eksport memberi sokongan kepada FCPO")
 
     if "biodiesel" in text:
         support.append("Permintaan biodiesel menyokong penggunaan minyak sawit")
 
-    if "inventory fall" in text or "stocks fall" in text:
-        support.append("Inventori sawit dijangka menurun")
+    if "firmer" in text or "stronger" in text:
+        support.append("Pasaran minyak sayuran menunjukkan pengukuhan")
 
-    if "tight supply" in text:
+    if "rebound" in text:
+        support.append("Harga sedang menunjukkan pemulihan")
+
+    if "tight" in text or "tightening" in text:
         support.append("Bekalan semakin ketat")
 
-    if "strong demand" in text:
-        support.append("Permintaan pasaran kekal kukuh")
+    if "demand" in text:
+        support.append("Permintaan kekal positif")
 
-    if "export increase" in text:
-        support.append("Eksport meningkat")
+    if "slip" in text or "decline" in text:
+        pressure.append("Harga mengalami tekanan penurunan")
 
-    if "inventory rise" in text or "stocks rise" in text:
+    if "weaken" in text or "weakened" in text:
+        pressure.append("Pasaran luar sedang melemah")
+
+    if "tariff" in text:
+        pressure.append("Isu tarif menambah ketidaktentuan pasaran")
+
+    if "inventory rise" in text:
         pressure.append("Inventori meningkat")
-
-    if "export fall" in text:
-        pressure.append("Eksport menurun")
-
-    if "crude oil weaker" in text:
-        pressure.append("Harga minyak mentah melemah")
-
-    if "decline" in text or "drop" in text:
-        pressure.append("Tekanan penurunan harga")
 
     score = max(0, min(score, 100))
 
@@ -85,6 +102,6 @@ def analyze_news(news_list):
         "score": score,
         "sentiment": sentiment,
         "bias": bias,
-        "support": support,
-        "pressure": pressure
+        "support": list(dict.fromkeys(support)),
+        "pressure": list(dict.fromkeys(pressure))
     }
