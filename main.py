@@ -104,7 +104,9 @@ def main():
 
     result = analyze_news(news)
 
-    report = build_report(news, result)
+    technical = get_technical_data()
+
+    report = build_report(news, result, technical)
 
     send_telegram(report)
 
