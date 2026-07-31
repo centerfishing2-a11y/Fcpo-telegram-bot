@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from news import get_fcpo_news
 from analysis import analyze_news
 from telegram_bot import send_telegram
+from technical import get_technical_data
 
 
 def malaysia_time():
