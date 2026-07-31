@@ -10,10 +10,26 @@ def malaysia_time():
     return (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%d-%m-%Y %H:%M")
 
 
-def build_report(news, result):
-    report = f"""🌴 <b>FCPO PRO REPORT V3</b>
+def build_report(news, result, technical):
+    report = f"""🌴 <b>FCPO PRO REPORT V4</b>
 
 📅 {malaysia_time()} MYT
+
+━━━━━━━━━━━━━━━━━━
+
+💰 <b>PASARAN FCPO</b>
+
+Harga Semasa : <b>{technical['price']}</b>
+
+📈 Trend Daily : {technical['daily_trend']}
+
+📈 Trend H4 : {technical['h4_trend']}
+
+📈 Trend H1 : {technical['h1_trend']}
+
+🟢 Support : {technical['support']}
+
+🔴 Resistance : {technical['resistance']}
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -23,19 +39,7 @@ def build_report(news, result):
 
     for i, item in enumerate(news, start=1):
         report += f"{i}. {item}\n\n"
-
-    report += "━━━━━━━━━━━━━━━━━━\n\n"
-
-    report += "<b>📊 SENTIMEN PASARAN</b>\n\n"
-
-    report += f"""{result['sentiment']}
-Skor : {result['score']}/100
-
-Bias :
-{result['bias']}
-
-"""
-
+    
     report += "━━━━━━━━━━━━━━━━━━\n\n"
 
     report += "🟢 <b>FAKTOR SOKONGAN</b>\n\n"
