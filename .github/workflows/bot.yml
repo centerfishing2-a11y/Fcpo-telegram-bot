@@ -2,7 +2,7 @@ name: FCPO Bot PRO
 
 on:
   schedule:
-    - cron: "34 * * * *"   # Setiap jam
+    - cron: "41 * * * *"   # Setiap jam
   workflow_dispatch:
 
 permissions:
